@@ -48,6 +48,7 @@
 /*
  *  LeFr  Leandro Francucci  lf@vortexmakes.com
  *  DaBa  Dario Baliña       dariosb@gmail.com
+ *  CaMa  Carlos Mancón      manconci@gmail.com
  */
 
 /* --------------------------------- Notes --------------------------------- */
@@ -90,6 +91,10 @@
     #include "rkht.h"
 #else
     #error "rkhtype.h: Platform definition is not found"
+#endif
+
+#ifdef __STM32_CM3F1_CUBEMX__
+    #include "../../portable/arm-cortex/rkhs/arm_cm3/stm32f1-cubemx/rkht.h"
 #endif
 
 /* ---------------------- External C language linkage ---------------------- */

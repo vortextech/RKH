@@ -47,6 +47,7 @@
 /*
  *  LeFr  Leandro Francucci  lf@vortexmakes.com
  *  DaBa  Dario Baliña       dariosb@gmail.com
+ *  CaMa  Carlos Mancón      manconci@gmail.com
  */
 
 /* --------------------------------- Notes --------------------------------- */
@@ -89,6 +90,10 @@
     #include "rkhport.h"
 #else
     #error "rkhplat.h: Platform definition is not found"
+#endif
+
+#ifdef __STM32_CM3F1_CUBEMX__
+    #include "../../portable/arm-cortex/rkhs/arm_cm3/stm32f1-cubemx/rkhport.h"
 #endif
 
 /* ---------------------- External C language linkage ---------------------- */
