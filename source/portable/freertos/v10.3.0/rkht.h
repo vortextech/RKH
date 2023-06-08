@@ -32,69 +32,29 @@
  */
 
 /**
- *  \file       rkhtype.h
- *  \brief      Defines the data types that uses RKH.
+ *  \file       rkht.h
+ *  \brief      FreeRTOS v10.2.0 port
  *
- *  \ingroup    apiPortMisc
+ *  \ingroup    port
  */
 
 /* -------------------------- Development history -------------------------- */
 /*
- *  2015.10.24  LeFr  v2.4.05  Initial version
- *  2019.02.1   Daba  v2.4.05  STM32 Port
+ *  2019.03.18  DaBa Initial version
  */
 
 /* -------------------------------- Authors -------------------------------- */
 /*
- *  LeFr  Leandro Francucci  lf@vortexmakes.com
- *  DaBa  Dario Baliña       dariosb@gmail.com
+ *  DaBa  Dario Bali#a       db@vortexmakes.com
  */
 
-/* --------------------------------- Notes --------------------------------- */
 /* --------------------------------- Module -------------------------------- */
-#ifndef __RKHTYPE_H__
-#define __RKHTYPE_H__
+#ifndef __RKHT_H__
+#define __RKHT_H__
 
 /* ----------------------------- Include files ----------------------------- */
-#if defined(__NO_OFFICIAL_PORT__)
-    #include "rkht.h"
-#elif defined(__W32STVC__)
-    #include "..\..\portable\80x86\win32_st\vc\rkht.h"
-#elif defined(__W32MTVC__)
-    #include "..\..\portable\80x86\win32_mt\vc\rkht.h"
-#elif defined(__LNXGNU__)
-    #include "../../portable/80x86/linux_st/gnu/rkht.h"
-#elif defined(__S08CW63__)
-    #include "..\..\portable\s08\rkhs\cw6_3\rkht.h"
-#elif defined(__CFV1CW63__)
-    #include "..\..\portable\cfv1\rkhs\cw6_3\rkht.h"
-#elif defined(__ARM_CM0CW10__)
-    #include "../../portable/arm-cortex/rkhs/arm_cm0/cw_v10/rkht.h"
-#elif defined(__ARM_CM4FCW10__)
-    #include "../../portable/arm-cortex/rkhs/arm_cm4f/cw_v10/rkht.h"
-#elif defined(__KSDK_KDS__)
-    #include "..\..\portable\arm-cortex\rkhs\ksdk\kds\rkht.h"
-#elif defined(__KSDK_OS_KDS__)
-    #include "..\..\portable\arm-cortex\ksdk_os\ucosiii\kds\rkht.h"
-#elif defined(__UCOS_V3_03_01__)
-    #include "..\..\portable\ucos\v3.03.01\rkht.h"
-#elif defined(__ARM_CM3XPRESSO___)
-    #include "../../portable/arm-cortex/rkhs/arm_cm3/codered/rkht.h"
-#elif defined(__TEST__)
-    #include "../../portable/test/rkht.h"
-#elif defined(__CIAANXP__)
-    #include "../../portable/arm-cortex/rkhs/arm_cm4f/ciaa_nxp/rkht.h"
-#elif defined(__STM32__)
-    #include "../../portable/arm-cortex/rkhs/arm_cm4f/stm32/rkht.h"
-#elif defined(__PLAT_DEF_BY_BUILD__)
-    #include "rkht.h"
-#else
-    #error "rkhtype.h: Platform definition is not found"
-#endif
-
-#ifdef __FREERTOS_V10_03_00__
-    #include "../../portable/freertos/v10.3.0/rkht.h"
-#endif
+#include "FreeRTOS.h"       /* the main freertos include file */
+#include "stdint.h"
 
 /* ---------------------- External C language linkage ---------------------- */
 #ifdef __cplusplus
@@ -104,6 +64,34 @@ extern "C" {
 /* --------------------------------- Macros -------------------------------- */
 /* -------------------------------- Constants ------------------------------ */
 /* ------------------------------- Data types ------------------------------ */
+/*
+ * The RKH uses a set of integer quantities. That maybe machine or
+ * compiler dependent.
+ */
+typedef int8_t ri8_t;
+typedef int16_t ri16_t;
+typedef int32_t ri32_t;
+typedef uint8_t rui8_t;
+typedef uint16_t rui16_t;
+typedef uint32_t rui32_t;
+
+/*
+ * The 'ruint' and 'rInt' will normally be the natural size for a
+ * particular machine. These types designates an integer type that is
+ * usually fastest to operate with among all integer types.
+ */
+typedef unsigned int ruint;
+typedef signed int rInt;
+
+/*
+ * Boolean data type and constants.
+ *
+ * \note
+ * The true (RKH_TRUE) and false (RKH_FALSE) values as defined as macro
+ * definitions in \c rkhdef.h file.
+ */
+typedef rInt rbool_t;
+
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */
 /* -------------------- External C language linkage end -------------------- */
@@ -114,4 +102,5 @@ extern "C" {
 /* ------------------------------ Module end ------------------------------- */
 #endif
 
-/* ------------------------------ End of file ------------------------------ */
+/* ------------------------------ File footer ------------------------------ */
+

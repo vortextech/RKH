@@ -1,3 +1,6 @@
 [submodule "third-party/ceedling"]
 	path = third-party/ceedling
 	url = https://github.com/ThrowTheSwitch/Ceedling.git
+[submodule "third-party/freertos/freertos_kernel"]
+	path = third-party/freertos/freertos_kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel.git

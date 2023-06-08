@@ -33,7 +33,7 @@ extern "C" {
 #define CLI1            CLI(1)
 #define CLI2            CLI(2)
 #define CLI3            CLI(3)
-#define CLI_STK_SIZE    (512 / sizeof(RKH_THREAD_STK_TYPE))
+#define CLI_STK_SIZE    (1024 / sizeof(RKH_THREAD_STK_TYPE))
 
 /* -------------------------------- Constants ------------------------------ */
 /* ................................ Signals ................................ */

@@ -70,6 +70,7 @@ main(int argc, char *argv[])
 
     rkh_fwk_enter();
     RKH_TRC_CLOSE();
+
     return 0;
 }
 

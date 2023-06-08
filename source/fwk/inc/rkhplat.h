@@ -91,6 +91,10 @@
     #error "rkhplat.h: Platform definition is not found"
 #endif
 
+#ifdef __FREERTOS_V10_03_00__
+    #include "../../portable/freertos/v10.3.0/rkhport.h"
+#endif
+
 /* ---------------------- External C language linkage ---------------------- */
 #ifdef __cplusplus
 extern "C" {

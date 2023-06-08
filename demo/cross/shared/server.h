@@ -29,7 +29,7 @@ extern "C" {
 
 /* --------------------------------- Macros -------------------------------- */
 #define CLI_ID(cp_)     ((cp_) - RKH_GET_PRIO(CLI(0)))
-#define SVR_STK_SIZE    (512 / sizeof(RKH_THREAD_STK_TYPE))
+#define SVR_STK_SIZE    (1024 / sizeof(RKH_THREAD_STK_TYPE))
 
 /* -------------------------------- Constants ------------------------------ */
 /* ................................ Signals ................................ */
