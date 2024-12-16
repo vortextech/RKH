@@ -1,5 +1,16 @@
 [
     {
+        "version": "3.5.00",
+        "date": "2024-13-12",
+        "new": ["Added function rkh_sm_propagate() to propagate an event to self without using the AO's event queue.",
+                "Added unit test cases to module rkhsm.c to demonstrate how to build periodic non-reactive/reactive active object classes."],
+        "bugfix": [],
+        "apichg": [],
+        "deprecated": [],
+        "port": [],
+        "note": []
+    },
+    {
         "version": "3.4.00",
         "date": "2021-21-06",
         "new": ["The RKH framework incorporates CMake as a tool for managing the building of the source code project. The RKH CMake project is intended for two purposes, to develop new services, features and examples of RKH, and to create reactive applications based on it.",

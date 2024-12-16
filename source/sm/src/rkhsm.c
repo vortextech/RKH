@@ -50,6 +50,8 @@
 
 /* --------------------------------- Notes --------------------------------- */
 /* ----------------------------- Include files ----------------------------- */
+#include "rkhdef.h"
+#include "rkhevt.h"
 #include "rkhitl.h"
 #include "rkhsm.h"
 #include "rkhassert.h"
@@ -392,7 +394,8 @@ rkh_sm_dispatch(RKH_SM_T *me, RKH_EVT_T *pe)
     RKHROM RKH_ST_T *cs, *ts;
     RKHROM void *ets;
     RKHROM RKH_TR_T *tr;
-    rbool_t isIntTrn, isCompletionEvent, isMicroStep, isCreationEvent;
+    rbool_t isIntTrn, isCompletionEvent, isMicroStep, isCreationEvent,
+        isPropagatedEvent;
     RKH_SIG_T in;
 #if RKH_CFG_TRC_EN == RKH_ENABLED
     rui8_t step;
@@ -423,7 +426,7 @@ rkh_sm_dispatch(RKH_SM_T *me, RKH_EVT_T *pe)
     RKH_SR_ALLOC();
 
     RKH_ASSERT(me && pe);
-    isCompletionEvent = isIntTrn = isMicroStep = RKH_FALSE;
+    isCompletionEvent = isIntTrn = isMicroStep = isPropagatedEvent = RKH_FALSE;
     isCreationEvent = (pe->e == RKH_SM_CREATION_EVENT);
 
     if (isCreationEvent == RKH_FALSE)
@@ -460,6 +463,15 @@ rkh_sm_dispatch(RKH_SM_T *me, RKH_EVT_T *pe)
     {
         pe = (RKH_EVT_T *)&evCompletion;
         isCompletionEvent = RKH_FALSE;
+    }
+    else if (isPropagatedEvent)
+    {
+        pe = me->propagatedEvent;
+        me->propagatedEvent = RKH_EVT_CAST(0);
+        isPropagatedEvent = RKH_FALSE;
+    }
+    else
+    {
     }
 
     if (isCreationEvent == RKH_FALSE)
@@ -753,7 +765,9 @@ rkh_sm_dispatch(RKH_SM_T *me, RKH_EVT_T *pe)
 
     RKH_TR_SM_EVT_PROC(me);
     isCreationEvent = RKH_FALSE;
-    } while (isCompletionEvent);
+    isPropagatedEvent =
+        (me->propagatedEvent != (RKH_EVT_T*)0) ? RKH_TRUE : RKH_FALSE;
+    } while (isCompletionEvent || isPropagatedEvent);
 
     INFO_EXEC_TRS(me);
     return RKH_EVT_PROC;
@@ -799,5 +813,12 @@ rkh_sm_else(void)
     return RKH_GTRUE;
 }
 #endif
+
+void
+rkh_sm_propagate(RKH_SM_T* me, RKH_EVT_T* e)
+{
+    RKH_REQUIRE((me != (RKH_SM_T*)0) && (e != (RKH_EVT_T*)0));
+    me->propagatedEvent = e;
+}
 
 /* ------------------------------ End of file ------------------------------ */
