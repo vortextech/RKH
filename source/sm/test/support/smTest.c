@@ -20,6 +20,7 @@
 
 #include "rkh.h"
 #include "smTest.h"
+#include "rkhsm.h"
 #include "smTestAct.h"
 
 /* ----------------------------- Local macros ------------------------------ */
@@ -38,6 +39,8 @@ RKH_CREATE_BASIC_STATE(waiting, NULL, NULL, RKH_ROOT, NULL);
 RKH_CREATE_TRANS_TABLE(waiting)
     RKH_TRREG(A, NULL, NULL, &s0),
     RKH_TRREG(B, NULL, NULL, &SmTest_Final),
+    RKH_TRINT(C, NULL, smTest_tr16),
+    RKH_TRINT(D, NULL, smTest_tr17),
 RKH_END_TRANS_TABLE
 
 RKH_CREATE_BASIC_STATE(s0, smTest_nS0, smTest_xS0, RKH_ROOT, NULL);

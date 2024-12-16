@@ -83,3 +83,6 @@
     - module_generator
     - gcov
     - junit_tests_report
+
+:test_runner:
+  :cmdline_args: true

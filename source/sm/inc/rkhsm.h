@@ -55,6 +55,7 @@
 #define __RKHSM_H__
 
 /* ----------------------------- Include files ----------------------------- */
+#include "rkhevt.h"
 #include "rkhitl.h"
 
 /* ---------------------- External C language linkage ---------------------- */
@@ -1914,6 +1915,12 @@ struct RKH_SM_T
      *  Points to current stable state (simple or final state).
      */
     RKHROM RKH_ST_T *state;
+
+    /**
+     *  \brief
+     *  Points to the propagated event.
+     */
+    RKH_EVT_T* propagatedEvent;
 };
 #else
 struct RKH_SM_T
@@ -1983,6 +1990,12 @@ struct RKH_SM_T
      *  Points to current stable state (simple or final state).
      */
     RKHROM RKH_ST_T *state;
+
+    /**
+     *  \brief
+     *  Points to the propagated event.
+     */
+    RKH_EVT_T* propagatedEvent;
 };
 #endif
 
@@ -2654,6 +2667,25 @@ rbool_t rkh_sm_else(const RKH_SM_T *sma);
 #else
 rbool_t rkh_sm_else(void);
 #endif
+
+/**
+ *  \brief
+ *  Propagate an event to self. This event will be processed subsequently,
+ *  without exiting from the current execution of rkh_sma_dispatch().
+ *  This feature has the same purpose as posting the interesting event to
+ *  this active object, but it ensures that the event is processed without
+ *  competing with other active objects that are ready to run.
+ *
+ *  \param[in] me   pointer to previously created state machine.
+ *	\param[in] e    pointer to arrived event. It's used as state-machine's
+ *					input alphabet.
+ *
+ *  \note
+ *  This function was intented to be called from a state machine action.
+ *
+ *  \ingroup apiSM
+ */
+void rkh_sm_propagate(RKH_SM_T *me, RKH_EVT_T* e);
 
 /* -------------------- External C language linkage end -------------------- */
 #ifdef __cplusplus

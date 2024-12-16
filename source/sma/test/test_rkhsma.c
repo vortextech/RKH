@@ -66,6 +66,8 @@
 #include "Mock_rkhsm.h"
 #include "Mock_rkhqueue.h"
 #include "Mock_rkhassert.h"
+#include "Mock_rkhtmr.h"
+#include "Mock_bsp.h"
 #include <string.h>
 
 /* ----------------------------- Local macros ------------------------------ */
@@ -414,6 +416,129 @@ test_ctorOfDynamicCompositeAO(void)
                              RKH_SMA_ACCESS_CONST(actObj, name));
 
     PublicSingle_dynDtor(actObj);
+}
+
+void
+test_ctorOfANonReactiveAO(void)
+{
+    RKH_SMA_T* realSignalMgr = RKH_UPCAST(RKH_SMA_T, signalMgr);
+
+    setUp_polymorphism();
+    rkh_sm_ctor_Expect(RKH_UPCAST(RKH_SM_T, signalMgr));
+
+    PerNonReactWoutST_ctor(signalMgr, 4);
+
+    TEST_ASSERT_EQUAL(4, PerNonReactWoutST_getBaz(signalMgr));
+    TEST_ASSERT_NULL(realSignalMgr->sm.state);
+}
+
+void
+test_invokeActivateOfANonReactiveAO(void)
+{
+    RKH_SMA_T* realSignalMgr = RKH_UPCAST(RKH_SMA_T, signalMgr);
+    const RKH_EVT_T *qs[1];
+
+    setUp_polymorphism();
+    rkh_sm_ctor_Expect(RKH_UPCAST(RKH_SM_T, signalMgr));
+    rkh_queue_init_Ignore();
+    rkh_enter_critical_Expect();
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SMA_REG, RKH_FALSE);
+    rkh_exit_critical_Expect();
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SMA_ACT, RKH_FALSE);
+
+    PerNonReactWoutST_ctor(signalMgr, 4);
+    RKH_SMA_ACTIVATE(RKH_UPCAST(RKH_SMA_T, signalMgr), qs, 1, NULL, 0);
+}
+
+void
+test_invokeDispatchOfANonReactiveAO(void)
+{
+    RKH_SMA_T* realSignalMgr = RKH_UPCAST(RKH_SMA_T, signalMgr);
+    const RKH_EVT_T *qs[1];
+    RKH_STATIC_EVENT(evt, sigSync); 
+
+    setUp_polymorphism();
+    rkh_sm_ctor_Expect(RKH_UPCAST(RKH_SM_T, signalMgr));
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SM_DCH, RKH_FALSE);
+    Sensor_get_ExpectAndReturn(48);
+    Sensor_process_ExpectAndReturn(48, 4);
+    Actuator_set_Expect(4);
+
+    PerNonReactWoutST_ctor(signalMgr, 4);
+    RKH_SMA_DISPATCH(RKH_UPCAST(RKH_SMA_T, signalMgr), &evt);
+}
+
+void
+test_ctorOfANonReactiveAOWithSTButWoutUsingEventQueue(void)
+{
+    RKH_SMA_T* realSignalMgr = RKH_UPCAST(RKH_SMA_T, collector);
+
+    setUp_polymorphism();
+    rkh_sm_ctor_Expect(RKH_UPCAST(RKH_SM_T, collector));
+    rkh_tmr_init__Expect(NULL, NULL);
+    rkh_tmr_init__IgnoreArg_t();
+    rkh_tmr_init__IgnoreArg_e();
+
+    PerNonReactWithSTWoutQue_ctor(collector, 4);
+
+    TEST_ASSERT_EQUAL(4, PerNonReactWithSTWoutQue_getBaz(collector));
+}
+
+void
+test_invokeActivateOfANonReactiveAOWithSTButWoutUsingEventQueue(void)
+{
+    RKH_SMA_T* realSignalMgr = RKH_UPCAST(RKH_SMA_T, collector);
+    const RKH_EVT_T *qs[1];
+
+    setUp_polymorphism();
+    rkh_sm_ctor_Expect(RKH_UPCAST(RKH_SM_T, collector));
+    rkh_tmr_init__Expect(NULL, NULL);
+    rkh_tmr_init__IgnoreArg_t();
+    rkh_tmr_init__IgnoreArg_e();
+    rkh_queue_init_Ignore();
+    rkh_enter_critical_Expect();
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SMA_REG, RKH_FALSE);
+    rkh_exit_critical_Expect();
+    rkh_sm_init_Expect(RKH_UPCAST(RKH_SM_T, collector));
+    rkh_tmr_start_Expect(NULL, realSignalMgr, 4, 4);
+    rkh_tmr_start_IgnoreArg_t();
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SMA_ACT, RKH_FALSE);
+
+    PerNonReactWithSTWoutQue_ctor(collector, 4);
+    RKH_SMA_ACTIVATE(RKH_UPCAST(RKH_SMA_T, collector), qs, 1, NULL, 0);
+}
+
+void
+test_invokeDispatchOfANonReactiveAOWithSTButWoutUsingEventQueue(void)
+{
+    RKH_SMA_T* realSignalMgr = RKH_UPCAST(RKH_SMA_T, collector);
+    const RKH_EVT_T *qs[1];
+    RKH_STATIC_EVENT(evtSync, sigSync); 
+
+    setUp_polymorphism();
+    rkh_sm_ctor_Expect(RKH_UPCAST(RKH_SM_T, collector));
+    rkh_tmr_init__Expect(NULL, NULL);
+    rkh_tmr_init__IgnoreArg_t();
+    rkh_tmr_init__IgnoreArg_e();
+    rkh_queue_init_Ignore();
+    rkh_enter_critical_Expect();
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SMA_REG, RKH_FALSE);
+    rkh_exit_critical_Expect();
+    rkh_sm_init_Expect(RKH_UPCAST(RKH_SM_T, collector));
+    rkh_tmr_start_Expect(NULL, realSignalMgr, 4, 4);
+    rkh_tmr_start_IgnoreArg_t();
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SMA_ACT, RKH_FALSE);
+    rkh_trc_isoff__ExpectAndReturn(RKH_TE_SM_DCH, RKH_FALSE);
+    Sensor_get_ExpectAndReturn(1.3);
+    Sensor_process_ExpectAndReturn(1.3, 1.2);
+    rkh_sm_dispatch_ExpectAndReturn(RKH_UPCAST(RKH_SM_T, collector),
+                                    NULL,
+                                    RKH_EVT_PROC);
+    rkh_sm_dispatch_IgnoreArg_e();
+
+    PerNonReactWithSTWoutQue_ctor(collector, 4);
+    RKH_SMA_ACTIVATE(RKH_UPCAST(RKH_SMA_T, collector), qs, 1, NULL, 0);
+    RKH_SMA_DISPATCH(RKH_UPCAST(RKH_SMA_T, collector), &evtSync);
 }
 
 /** @} doxygen end group definition */

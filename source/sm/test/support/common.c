@@ -262,6 +262,12 @@ expInitSm(RKH_SMA_T *const me, const RKH_ST_T *dftSt)
     }
 }
 
+RKH_EVT_T*
+getPropagatedEvent(RKH_SMA_T* const me)
+{
+    return RKH_UPCAST(RKH_SM_T, me)->propagatedEvent;
+}
+
 /** @} doxygen end group definition */
 /** @} doxygen end group definition */
 /* ------------------------------ End of file ------------------------------ */

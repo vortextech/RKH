@@ -51,6 +51,8 @@ void smTest_tr12(SmTest *const me, RKH_EVT_T *pe);
 void smTest_tr13(SmTest *const me, RKH_EVT_T *pe);
 void smTest_tr14(SmTest *const me, RKH_EVT_T *pe);
 void smTest_tr15(SmTest *const me, RKH_EVT_T *pe);
+void smTest_tr16(SmTest *const me, RKH_EVT_T *pe);
+void smTest_tr17(SmTest *const me, RKH_EVT_T *pe);
 void smTest_tr21(SmTest *const me, RKH_EVT_T *pe);
 void smTest_tr22(SmTest *const me, RKH_EVT_T *pe);
 void smTest_tr23(SmTest *const me, RKH_EVT_T *pe);

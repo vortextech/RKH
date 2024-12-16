@@ -24,6 +24,7 @@
 /* ----------------------------- Include files ----------------------------- */
 
 #include "rkh.h"
+#include "rkhevt.h"
 
 /* ---------------------- External C language linkage ---------------------- */
 
@@ -82,6 +83,7 @@ void setState(RKH_SMA_T *const me, const RKH_ST_T *state);
 const RKH_ST_T *getState(RKH_SMA_T *const me);
 void stateList_create(const RKH_ST_T **list, int nElems, ...);
 void expInitSm(RKH_SMA_T *const me, const RKH_ST_T *dftSt);
+RKH_EVT_T* getPropagatedEvent(RKH_SMA_T *const me);
 
 /* -------------------- External C language linkage end -------------------- */
 

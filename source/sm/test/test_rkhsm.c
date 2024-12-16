@@ -253,6 +253,20 @@ setRKHTraceFilters(void)
     RKH_FILTER_OFF_EVENT(RKH_TE_FWK_ASSERT);
 }
 
+static void 
+MockEffectCallback0(SmTest *const me, RKH_EVT_T *pe, int cmock_num_calls)
+{
+    TEST_ASSERT_NULL(getPropagatedEvent(smTest));
+    rkh_sm_propagate(RKH_UPCAST(RKH_SM_T, me), &evD);
+    TEST_ASSERT_NOT_NULL(getPropagatedEvent(smTest));
+}
+
+static void 
+MockEffectCallback1(SmTest *const me, RKH_EVT_T *pe, int cmock_num_calls)
+{
+    TEST_ASSERT_NULL(getPropagatedEvent(smTest));
+}
+
 /* ---------------------------- Global functions --------------------------- */
 void 
 setUp(void)
@@ -1868,6 +1882,30 @@ test_trnWoutUnitrazerSyncDispatchingToStateMachine(void)
     TEST_IGNORE();
 
     setUpWoutUnitrazer();
+}
+
+void
+test_trnWoutUnitrazerPropagateAnEvent(void)
+{
+    setUpWoutUnitrazer();
+
+    expectedState = RKH_STATE_CAST(&waiting);
+
+    smTest_init_Expect(RKH_CAST(SmTest, smTest), (RKH_EVT_T *)&evCreation);
+    smTest_tr16_Expect(RKH_CAST(SmTest, smTest), &evC);
+    smTest_tr16_StubWithCallback(MockEffectCallback0);
+    smTest_tr17_Expect(RKH_CAST(SmTest, smTest), &evD);
+    smTest_tr17_StubWithCallback(MockEffectCallback1);
+    setProfileWoutUnitrazer(smTest,
+                            RKH_STATE_CAST(&waiting),
+                            RKH_STATE_CAST(&waiting),
+                            expectedState,
+                            INIT_STATE_MACHINE);
+
+    result = rkh_sm_dispatch((RKH_SM_T *)smTest, &evC);
+
+    TEST_ASSERT_TRUE(expectedState == getState(smTest));
+    TEST_ASSERT_EQUAL(RKH_EVT_PROC, result);
 }
 
 /** @} doxygen end group definition */

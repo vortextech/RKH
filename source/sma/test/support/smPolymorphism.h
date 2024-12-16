@@ -21,7 +21,6 @@
 #define __SMPOLYMORPHISM_H__
 
 /* ----------------------------- Include files ----------------------------- */
-
 #include "rkh.h"
 
 /* ---------------------- External C language linkage ---------------------- */
@@ -32,6 +31,11 @@ extern "C" {
 
 /* --------------------------------- Macros -------------------------------- */
 /* -------------------------------- Constants ------------------------------ */
+enum
+{
+    sigSync, sigSignalReady
+};
+
 /* ------------------------------- Data types ------------------------------ */
 typedef struct Multiple Multiple;
 
@@ -45,6 +49,16 @@ struct MultipleVtbl
 typedef struct Command Command;
 typedef struct CallControl CallControl;
 
+typedef struct PerNonReactWoutST PerNonReactWoutST;
+typedef struct PerNonReactWithSTWoutQue PerNonReactWithSTWoutQue;
+
+typedef struct SignalReady SignalReady;
+struct SignalReady
+{
+    RKH_EVT_T base;
+    double value;
+};
+
 /* -------------------------- External variables --------------------------- */
 RKH_SMA_DCLR(singleton);
 
@@ -55,6 +69,10 @@ RKH_SMA_DCLR_TYPE(Command, cmdSignal);
 RKH_SMA_DCLR_TYPE(Command, cmdRegister);
 
 RKH_SMA_DCLR_TYPE(CallControl, theCallControl);
+RKH_SMA_DCLR_TYPE(PerNonReactWoutST, signalMgr);
+RKH_SMA_DCLR_TYPE(PerNonReactWithSTWoutQue, collector);
+
+RKH_DCLR_BASIC_STATE idle, active;
 
 /* -------------------------- Function prototypes -------------------------- */
 void Singleton_ctor(int foo);
@@ -80,6 +98,15 @@ void CallControl_task(RKH_SMA_T *me, void *arg);
 void CallControl_ctorA(int foo);
 void CallControl_ctorB(int foo);
 int CallControl_getFoo(void);
+
+void PerNonReactWoutST_ctor(PerNonReactWoutST* const me, int baz);
+int PerNonReactWoutST_getBaz(PerNonReactWoutST* const me);
+
+void PerNonReactWithSTWoutQue_ctor(PerNonReactWithSTWoutQue* const me, int baz);
+int PerNonReactWithSTWoutQue_getBaz(PerNonReactWithSTWoutQue* const me);
+rbool_t isGreaterThanLevel1(PerNonReactWithSTWoutQue*const me, RKH_EVT_T *pe);
+rbool_t isLessThanLevel1(PerNonReactWithSTWoutQue* const me, RKH_EVT_T* pe);
+void activeProcess(PerNonReactWithSTWoutQue* const me, RKH_EVT_T* pe);
 
 /* -------------------- External C language linkage end -------------------- */
 #ifdef __cplusplus

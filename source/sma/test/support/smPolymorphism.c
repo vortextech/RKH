@@ -49,11 +49,20 @@
 
 /* --------------------------------- Notes --------------------------------- */
 /* ----------------------------- Include files ----------------------------- */
+#include "rkhdef.h"
+#include "rkhevt.h"
+#include "rkhfwk_cast.h"
+#include "rkhitl.h"
+#include "rkhsm.h"
 #include "rkhsma.h"
 #include "smPolymorphism.h"
+#include "bsp.h"
+#include "rkhtmr.h"
 
 /* ----------------------------- Local macros ------------------------------ */
 /* ------------------------------- Constants ------------------------------- */
+RKH_MODULE_NAME(smPolymorphism)
+
 /* ---------------------------- Local data types --------------------------- */
 typedef struct Singleton Singleton;
 struct Singleton
@@ -83,6 +92,20 @@ struct CallControl
     int foo;
 };
 
+struct PerNonReactWoutST
+{
+    RKH_SMA_T base;
+    int baz;
+};
+
+struct PerNonReactWithSTWoutQue
+{
+    RKH_SMA_T base;
+    int baz;
+    RKHTmEvt syncTmr;
+    SignalReady signalReady;
+};
+
 /* ---------------------------- Global variables --------------------------- */
 /* ---------------------------- Local variables ---------------------------- */
 RKH_SMA_CREATE(Singleton, singleton, 0, HCAL, NULL, NULL, NULL);
@@ -100,6 +123,25 @@ RKH_SMA_DEF_PTR_TYPE(Command, cmdRegister);
 
 RKH_SMA_CREATE(CallControl, theCallControl, 0, HCAL, NULL, NULL, NULL);
 RKH_SMA_DEF_PTR_TYPE(CallControl, theCallControl);
+
+RKH_SMA_CREATE(PerNonReactWoutST, signalMgr, 2, 0, NULL, NULL, NULL);
+RKH_SMA_DEF_PTR_TYPE(PerNonReactWoutST, signalMgr);
+
+RKH_SMA_CREATE(PerNonReactWithSTWoutQue, collector, 2, HCAL, &idle, NULL, NULL);
+RKH_SMA_DEF_PTR_TYPE(PerNonReactWithSTWoutQue, collector);
+
+/*
+ *	Defines states and pseudostates.
+ */
+RKH_CREATE_BASIC_STATE(idle, NULL, NULL, RKH_ROOT, NULL);
+RKH_CREATE_TRANS_TABLE(idle)
+RKH_TRREG(sigSignalReady, isGreaterThanLevel1, activeProcess, &active),
+RKH_END_TRANS_TABLE
+
+RKH_CREATE_BASIC_STATE(active, NULL, NULL, RKH_ROOT, NULL);
+RKH_CREATE_TRANS_TABLE(active)
+RKH_TRREG(sigSignalReady, isLessThanLevel1, NULL, &idle),
+RKH_END_TRANS_TABLE
 
 /* ----------------------- Local function prototypes ----------------------- */
 /* ---------------------------- Local functions ---------------------------- */
@@ -137,6 +179,80 @@ static void
 Multiple_toggle(Multiple *me)
 {
     me->foobar = (int)((me->foobar & 1u) == 0);
+}
+
+static void
+PerNonReactWoutST_activate(RKH_SMA_T* me, const RKH_EVT_T** qSto,
+                           RKH_QUENE_T qSize, void* stkSto, rui32_t stkSize)
+{
+    (void)stkSto;
+    (void)stkSize;
+    RKH_SR_ALLOC();
+
+    RKH_REQUIRE((qSto != (const RKH_EVT_T **)0) && (qSize != (RKH_QUENE_T)0));
+
+    rkh_queue_init(&me->equeue, (const void * *)qSto, qSize, me);
+    rkh_sma_register(me);
+    RKH_TR_SMA_ACT(me, RKH_GET_PRIO(me), qSize);
+}
+
+static void
+PerNonReactWoutST_task(RKH_SMA_T *me, void *arg)
+{
+    RKH_EVT_T* evt = RKH_EVT_CAST(arg);
+
+    RKH_ASSERT((me != (RKH_SMA_T*)0) && (evt != (RKH_EVT_T*)0));
+    if (evt->e == sigSync)
+    {
+        RKH_TR_SM_DCH(me,            /* this active object */
+                      evt,           /* event */
+                      (RKH_ST_T*)0); /* it does not use a state machine */
+
+        double sensorValue = Sensor_get();
+        double actuatorOutput = Sensor_process(sensorValue);
+        Actuator_set(actuatorOutput);
+    }
+}
+
+static void
+PerNonReactWithSTWoutQue_activate(RKH_SMA_T* me, const RKH_EVT_T** qSto,
+                                  RKH_QUENE_T qSize, void* stkSto,
+                                  rui32_t stkSize)
+{
+    (void)stkSto;
+    (void)stkSize;
+    PerNonReactWithSTWoutQue* realMe = RKH_DOWNCAST(PerNonReactWithSTWoutQue, me);
+    RKH_SR_ALLOC();
+
+    RKH_REQUIRE((qSto != (const RKH_EVT_T **)0) && (qSize != (RKH_QUENE_T)0));
+
+    rkh_queue_init(&me->equeue, (const void * *)qSto, qSize, me);
+    rkh_sma_register(me);
+    rkh_sm_init((RKH_SM_T *)me);
+    RKH_TMR_PERIODIC(&realMe->syncTmr.tmr, me, 4, 4);
+    RKH_TR_SMA_ACT(me, RKH_GET_PRIO(me), qSize);
+}
+
+static void
+PerNonReactWithSTWoutQue_task(RKH_SMA_T *me, void *arg)
+{
+    RKH_EVT_T* evt = RKH_EVT_CAST(arg);
+    PerNonReactWithSTWoutQue* realMe =
+        RKH_DOWNCAST(PerNonReactWithSTWoutQue, me);
+
+    RKH_ASSERT((me != (RKH_SMA_T*)0) && (evt != (RKH_EVT_T*)0));
+    if (evt->e == sigSync)
+    {
+        RKH_TR_SM_DCH(me,            /* this active object */
+                      evt,           /* event */
+                      (RKH_ST_T*)0); /* it does not use a state machine */
+
+        double sensorValue = Sensor_get();
+        double actuatorOutput = Sensor_process(sensorValue);
+        realMe->signalReady.value = actuatorOutput;
+        rkh_sm_dispatch(RKH_UPCAST(RKH_SM_T, me),
+                        RKH_EVT_CAST(&realMe->signalReady));
+    }
 }
 
 /* ---------------------------- Global functions --------------------------- */
@@ -330,6 +446,72 @@ int
 CallControl_getFoo(void)
 {
     return theCallControl->foo;
+}
+
+void
+PerNonReactWoutST_ctor(PerNonReactWoutST* const me, int baz)
+{
+    static const RKHSmaVtbl vtbl =
+    {
+        PerNonReactWoutST_activate,
+        PerNonReactWoutST_task,
+        rkh_sma_post_fifo,
+        rkh_sma_post_lifo
+    };
+
+    rkh_sma_ctor(&me->base, &vtbl);
+    me->baz = baz;
+}
+
+int
+PerNonReactWoutST_getBaz(PerNonReactWoutST* const me)
+{
+    return me->baz;
+}
+
+void
+PerNonReactWithSTWoutQue_ctor(PerNonReactWithSTWoutQue* const me, int baz)
+{
+    static const RKHSmaVtbl vtbl =
+    {
+        PerNonReactWithSTWoutQue_activate,
+        PerNonReactWithSTWoutQue_task,
+        rkh_sma_post_fifo,
+        rkh_sma_post_lifo
+    };
+
+    rkh_sma_ctor(&me->base, &vtbl);
+    RKH_SET_STATIC_EVENT(&me->syncTmr, sigSync);
+    RKH_TMR_INIT(&me->syncTmr.tmr, 
+                 RKH_UPCAST(RKH_EVT_T, &me->syncTmr), 
+                 NULL);
+    RKH_SET_STATIC_EVENT(&me->signalReady, sigSignalReady);
+    me->baz = baz;
+}
+
+int
+PerNonReactWithSTWoutQue_getBaz(PerNonReactWithSTWoutQue* const me)
+{
+    return me->baz;
+}
+
+rbool_t
+isGreaterThanLevel1(PerNonReactWithSTWoutQue* const me, RKH_EVT_T* pe)
+{
+    SignalReady* realEvt = RKH_DOWNCAST(SignalReady, pe);
+    return (realEvt->value > 1.2) ? RKH_TRUE : RKH_FALSE;
+}
+
+rbool_t
+isLessThanLevel1(PerNonReactWithSTWoutQue* const me, RKH_EVT_T* pe)
+{
+    return false;
+}
+
+void
+activeProcess(PerNonReactWithSTWoutQue* const me, RKH_EVT_T* pe)
+{
+    me->baz = 0;
 }
 
 /* ------------------------------ End of file ------------------------------ */

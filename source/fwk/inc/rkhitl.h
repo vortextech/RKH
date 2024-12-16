@@ -1718,7 +1718,8 @@ extern "C" {
 #if RKH_CFG_SMA_SM_CONST_EN == RKH_ENABLED
     #define MKSM(constSM, initialState) \
         (RKHROM RKH_ROM_T *)(constSM), /** RKH_SM_T::romrkh member */ \
-        (RKHROM RKH_ST_T *)(initialState) /** RKH_SM_T::state member */
+        (RKHROM RKH_ST_T *)(initialState), /** RKH_SM_T::state member */ \
+        (RKH_EVT_T *)(0) /** RKH_SM_T::propagatedEvent member */
 
     #if RKH_CFG_SMA_VFUNCT_EN == RKH_ENABLED
         #define MKSMA(constSM, initialState) \
@@ -1739,13 +1740,13 @@ extern "C" {
                          initialEvt) \
                 (prio), (ppty), #name, (RKHROM RKH_ST_T*)initialState, \
                 ((RKH_TRN_ACT_T)initialAction), (initialEvt), \
-                (RKHROM RKH_ST_T*)initialState
+                (RKHROM RKH_ST_T*)initialState, (RKH_EVT_T*)0
         #else
             #define MKSM(name, prio, ppty, initialState, initialAction, \
                          initialEvt) \
                 (prio), (ppty), (RKHROM RKH_ST_T*)initialState, \
                 ((RKH_TRN_ACT_T)initialAction), (initialEvt), \
-                (RKHROM RKH_ST_T*)initialState
+                (RKHROM RKH_ST_T*)initialState, (RKH_EVT_T*)0
         #endif
     #else
         #if R_TRC_AO_NAME_EN == RKH_ENABLED
@@ -1753,13 +1754,13 @@ extern "C" {
                          initialEvt) \
                 (prio), (ppty), #name, (RKHROM RKH_ST_T*)initialState, \
                 ((RKH_TRN_ACT_T)initialAction), \
-                (RKHROM RKH_ST_T*)initialState
+                (RKHROM RKH_ST_T*)initialState, (RKH_EVT_T*)0
         #else
             #define MKSM(name, prio, ppty, initialState, initialAction, \
                          initialEvt) \
                 (prio), (ppty), (RKHROM RKH_ST_T*)initialState, \
                 ((RKH_TRN_ACT_T)initialAction), \
-                (RKHROM RKH_ST_T*)initialState
+                (RKHROM RKH_ST_T*)initialState, (RKH_EVT_T*)0
         #endif
     #endif
     #if RKH_CFG_SMA_VFUNCT_EN == RKH_ENABLED
@@ -1787,7 +1788,8 @@ extern "C" {
         ((RKH_SM_T *)(sm_))->istate = (RKHROM RKH_ST_T*)initialState_; \
         ((RKH_SM_T *)(sm_))->iaction = (RKH_TRN_ACT_T)initialAction_; \
         MKSM_IEVENT(sm_, initialEvt_); \
-        ((RKH_SM_T *)(sm_))->state = (RKHROM RKH_ST_T*)initialState_
+        ((RKH_SM_T *)(sm_))->state = (RKHROM RKH_ST_T*)initialState_; \
+        ((RKH_SM_T *)(sm_))->propagatedEvent = (RKH_EVT_T*)0;
 
     #if R_TRC_AO_NAME_EN == RKH_ENABLED
         #if RKH_CFG_SMA_INIT_EVT_EN == RKH_ENABLED
