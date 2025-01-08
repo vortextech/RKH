@@ -1192,6 +1192,7 @@ This section includes:
 - \ref qref10
 - \ref qref15
 - \ref qref18
+- \ref qref19
 
 \n
 
@@ -2919,6 +2920,143 @@ Explanation
 \li (7-8) Stops both event timers. 
 
 \subsection qref18_3 Customization
+
+Each RKH application must have its own configuration file, called 
+\c rkhcfg.h. This file adapts and configures RKH by means of compiler
+definitions and macros allowing to restrict the resources consumed by RKH.
+Adjusting this definitions allows to reduce the ROM and RAM consumption,
+and to enhance the system performance in a substantial manner. The 
+\c rkhcfg.h shows the general layout of the configuration file.
+Use the following macros to reduce the memory taken by state machine 
+structure: #RKH_CFG_TMR_EN, #RKH_CFG_TMR_SIZEOF_NTIMER, #RKH_CFG_TMR_HOOK_EN, 
+#RKH_CFG_TMR_GET_INFO_EN.
+See \ref cfg section for more information. 
+
+<HR>
+\section qref19 Defining special active objects
+
+\n Prev: \ref qref "Quick reference" \n
+
+\n
+This section presents a series of examples that demonstrate the RKH framework's 
+ability to implement different types of active objects, including periodic and 
+non-reactive ones, showcasing its flexibility. In this case, the word type 
+refers to object behavior. According to the behavioral classification scheme 
+proposed by Bruce Douglass, it may be simple (its behavior is not dependent on 
+its history), reactive (its behavior depends on a finite set of states), or 
+continuous (its behavior depends on its history but in a continuous way).
+
+-# \ref qref19_1
+-# \ref qref19_2
+-# \ref qref19_3
+    -# \ref qref19_3_1
+        -# \ref qref19_3_1_1
+        -# \ref qref19_3_1_2
+    -# \ref qref19_3_2
+        -# \ref qref19_3_2_1
+        -# \ref qref19_3_2_2
+-# \ref qref19_customization
+
+\subsection qref19_1 Active object with a parameterized state machine
+
+In order to demonstrate how to handle a parameterized state machine from an 
+active object by using the RKH framework, a digital pulse counter will be 
+used as an example. It validates and counts digital pulses from N digital 
+signals of the same type, whose waveforms and its parameters are shown below.
+The behavior of the pulse counters are modeled as statecharts, but they are 
+not active objects. Instead, pulse counters called PulseCounters are 
+components of a container active object called PulseCounterMgr. The container 
+is entirely responsible for its components. In particular, it must explicitly 
+trigger initial transitions in all components as well as explicitly dispatch 
+events to its components. They share both event queue and priority level of 
+its container.
+The entire example is located in doc/examples/PulseCounterMgr directory.
+
+-# \ref qref19_1_1
+-# \ref qref19_1_2
+-# \ref qref19_1_3
+-# \ref qref19_1_4
+-# \ref qref19_1_5
+-# \ref qref19_1_6
+-# \ref qref19_1_7
+
+\subsubsection qref19_1_1 Define the type of the state machine to be parameterized
+The parameterized state machine is represented as a statechart. Almost every 
+state machine must also store other extended information, which is maintained 
+by means of data members enlisted after the base structure, in this case 
+RKH_SM_T. Moreover, this information would often include attributes to 
+facilitate the state machine operation like an identification number and a 
+reference to the container. It is recommended to define this type in the 
+PulseCounterMgr implementation file.
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounter definition 
+
+\subsubsection qref19_1_2 Define the type of the container active object 
+This type is derived from RKH_SMA_T type, so an attribute of RKH_SMA_T type has 
+to be defined as its first attribute. The active object maintains an instance 
+of the parameterized state machine, which is defined as an array of state 
+machines. If this type is defined in the PulseCounterMgr implementation file, 
+it will be an opaque type.
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounterMgr definition 
+
+\subsubsection qref19_1_3 Declare the active object type 
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.h Type declaration
+
+\subsubsection qref19_1_4 Instantiate the active object
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounterMgr instance
+
+\subsubsection qref19_1_5 Define and declare a reference to the active object
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounterMgr pointer definition
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.h PulseCounterMgr pointer declaration
+
+\subsubsection qref19_1_6 Instantiate the constant part of the parameterized state machine
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounter instance
+
+\subsubsection qref19_1_7 Define and declare a constructor
+The PulseCounterMgr constructor initializes the PulseCounterMgr's virtual 
+table and its state machine components.
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Constructor
+
+The type PulseCounterMgr specializes two functions of RKHSmaVtbl, 
+RKHSmaVtbl::activate and RKHSmaVtbl::task. 
+The first one initializes every state machine component by calling the 
+framework function rkh_sm_init(). It effectively triggers the topmost 
+initial transition of a state machine.
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Activate 
+
+The specialized version of RKHSmaVtbl::task dispatches received events to 
+the corresponding PulseCounter state machine.
+\snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Task
+
+\subsection qref19_2 Non-reactive active object
+...
+
+\subsection qref19_3 Periodic active object
+...
+
+\subsection qref19_3_1 Non-reactive
+
+- \ref qref19_3_1_1
+- \ref qref19_3_1_2
+
+\subsubsection qref19_3_1_1 Simple
+...
+
+\subsubsection qref19_3_1_2 But using a state machine with synchronous inputs
+...
+
+\subsection qref19_3_2 Reactive
+...
+
+- \ref qref19_3_2_1
+- \ref qref19_3_2_2
+
+\subsubsection qref19_3_2_1 Using orthogonal regions
+...
+
+\subsubsection qref19_3_2_2 Propagating events
+...
+
+\subsection qref19_customization Customization
 
 Each RKH application must have its own configuration file, called 
 \c rkhcfg.h. This file adapts and configures RKH by means of compiler

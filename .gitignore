@@ -25,6 +25,8 @@
 
 # Build tree
 /build
+/Debug
+/**/Debug
 
 #
 # Top-level generic files
@@ -52,6 +54,8 @@
 /spl/
 /tpl/
 /doc/html/
+/**/.cache
+/**/compile_commands.json
 
 #
 # Generated include files
