@@ -25,6 +25,7 @@ extern "C" {
 /* --------------------------------- Macros -------------------------------- */
 /* -------------------------------- Constants ------------------------------ */
 /* ------------------------------- Data types ------------------------------ */
+//! [Event types]
 typedef struct StatusEvt StatusEvt;
 struct StatusEvt
 {
@@ -38,6 +39,7 @@ struct TimeEvt
     RKHTmEvt evt;  /* time event */
     int id;        /* SM component identifier */
 };
+//! [Event types]
 
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */

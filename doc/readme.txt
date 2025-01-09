@@ -2940,11 +2940,12 @@ See \ref cfg section for more information.
 \n
 This section presents a series of examples that demonstrate the RKH framework's 
 ability to implement different types of active objects, including periodic and 
-non-reactive ones, showcasing its flexibility. In this case, the word type 
-refers to object behavior. According to the behavioral classification scheme 
-proposed by Bruce Douglass, it may be simple (its behavior is not dependent on 
-its history), reactive (its behavior depends on a finite set of states), or 
-continuous (its behavior depends on its history but in a continuous way).
+non-reactive ones, showcasing its flexibility. In this case, type 
+refers to the object behavior. According to the behavioral classification 
+scheme proposed by Bruce Douglass, it may be simple (its behavior is not 
+dependent on its history), reactive (its behavior depends on a finite set of 
+states), or continuous (its behavior depends on its history but in a 
+continuous way).
 
 -# \ref qref19_1
 -# \ref qref19_2
@@ -2979,6 +2980,8 @@ The entire example is located in doc/examples/PulseCounterMgr directory.
 -# \ref qref19_1_5
 -# \ref qref19_1_6
 -# \ref qref19_1_7
+-# \ref qref19_1_8
+-# \ref qref19_1_9
 
 \subsubsection qref19_1_1 Define the type of the state machine to be parameterized
 The parameterized state machine is represented as a statechart. Almost every 
@@ -3016,7 +3019,18 @@ The PulseCounterMgr constructor initializes the PulseCounterMgr's virtual
 table and its state machine components.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Constructor
 
-The type PulseCounterMgr specializes two functions of RKHSmaVtbl, 
+\subsubsection qref19_1_8 Define event types
+PulseCounterMgr and its components handle two types of events, StatusEvt and 
+TimeEvt. StatusEvt carries the status of digital signals (Active and Inactive), 
+whereas TimeEvt corresponds to time events.
+As shown in the following code fragment, both kinds of events derive from 
+framework event types, RKH_EVT_T and TimeEvt respectively and both have an 
+id parameter to identify the PulseCounter target.
+\snippet doc/examples/PulseCounterMgr/events.h Event types
+
+\subsubsection qref19_1_9 Override framework operations 
+The type PulseCounterMgr specializes two functions of the framework's type 
+RKH_SMA_T through its virtual table. These functions are 
 RKHSmaVtbl::activate and RKHSmaVtbl::task. 
 The first one initializes every state machine component by calling the 
 framework function rkh_sm_init(). It effectively triggers the topmost 
@@ -3024,7 +3038,10 @@ initial transition of a state machine.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Activate 
 
 The specialized version of RKHSmaVtbl::task dispatches received events to 
-the corresponding PulseCounter state machine.
+the the corresponding PulseCounter state machine. This function demonstrates 
+how to use the id parameter of received events to dispatch them to 
+PulseCounters. This example defines id parameter as integer, so it becomes 
+the index into the pulseCounters[] array.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Task
 
 \subsection qref19_2 Non-reactive active object
