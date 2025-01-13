@@ -25,6 +25,7 @@ extern "C" {
 /* --------------------------------- Macros -------------------------------- */
 /* -------------------------------- Constants ------------------------------ */
 /* ------------------------------- Data types ------------------------------ */
+//! [Event types]
 typedef struct PushedButton PushedButton;
 struct PushedButton
 {
@@ -46,6 +47,7 @@ struct ADC
     uint8_t channel;
     double value;
 };
+//! [Event types]
 
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */

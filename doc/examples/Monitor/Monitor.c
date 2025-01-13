@@ -30,15 +30,21 @@
 /* ............................ Declares guards ............................ */
 /* ........................ States and pseudostates ........................ */
 /* ............................. Active object ............................. */
+//! [Monitor definition]
 struct Monitor
 {
     RKH_SMA_T base;
     int baz;
     RKHTmEvt syncTmr;
 };
+//! [Monitor definition]
 
+//! [Monitor instance]
 RKH_SMA_CREATE(Monitor, monitor, MonitorPrio, 0, NULL, NULL, NULL);
+//! [Monitor instance]
+//! [Monitor pointer definition]
 RKH_SMA_DEF_PTR_TYPE(Monitor, monitor);
+//! [Monitor pointer definition]
 
 /* ------------------------------- Constants ------------------------------- */
 RKH_MODULE_NAME(Monitor)
@@ -63,6 +69,7 @@ showKeepAliveOnScreen(void)
 {
 }
 
+//! [Activate]
 static void
 activate(RKH_SMA_T* me, const RKH_EVT_T** qSto, RKH_QUENE_T qSize,
                    void* stkSto, rui32_t stkSize)
@@ -78,6 +85,7 @@ activate(RKH_SMA_T* me, const RKH_EVT_T** qSto, RKH_QUENE_T qSize,
     RKH_TMR_PERIODIC(&realMe->syncTmr.tmr, me, TIME_PER, TIME_PER);
     RKH_TR_SMA_ACT(me, RKH_GET_PRIO(me), qSize);
 }
+//! [Activate]
 
 /**
  *  \brief
@@ -91,6 +99,7 @@ activate(RKH_SMA_T* me, const RKH_EVT_T** qSto, RKH_QUENE_T qSize,
  *  processData() and if the message comes from any other task then the message
  *  is processed by calling the function processCmd().
  */
+//! [Task]
 static void
 task(RKH_SMA_T* me, void* arg)
 {
@@ -129,12 +138,14 @@ task(RKH_SMA_T* me, void* arg)
     }
     RKH_TR_SM_DCH(me, evt, RKH_CAST(RKH_ST_T, 0));
 }
+//! [Task]
 
 /* ............................ Effect actions ............................. */
 /* ............................. Entry actions ............................. */
 /* ............................. Exit actions .............................. */
 /* ................................ Guards ................................. */
 /* ---------------------------- Global functions --------------------------- */
+//! [Constructor definition]
 void
 Monitor_ctor(Monitor* const me, int baz)
 {
@@ -152,6 +163,7 @@ Monitor_ctor(Monitor* const me, int baz)
     RKH_TMR_INIT(&me->syncTmr.tmr, RKH_UPCAST(RKH_EVT_T, &me->syncTmr), NULL);
     me->baz = baz;
 }
+//! [Constructor definition]
 
 int
 Monitor_getBaz(Monitor* const me)

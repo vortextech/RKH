@@ -28,13 +28,19 @@ extern "C" {
 
 /* ................................ Signals ................................ */
 /* ........................ Declares active object ......................... */
+//! [Type declaration]
 typedef struct SignalMgr SignalMgr;
+//! [Type declaration]
+//! [Object pointer declaration]
 RKH_SMA_DCLR_TYPE(SignalMgr, signalMgr);
+//! [Object pointer declaration]
 
 /* ------------------------------- Data types ------------------------------ */
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */
+//! [Constructor declaration]
 void SignalMgr_ctor(SignalMgr* const me, int baz);
+//! [Constructor declaration]
 int SignalMgr_getBaz(SignalMgr* const me);
 
 /* -------------------- External C language linkage end -------------------- */

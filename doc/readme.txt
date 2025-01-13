@@ -2942,10 +2942,16 @@ This section presents a series of examples that demonstrate the RKH framework's
 ability to implement different types of active objects, including periodic and 
 non-reactive ones, showcasing its flexibility. In this case, type 
 refers to the object behavior. According to the behavioral classification 
-scheme proposed by Bruce Douglass, it may be simple (its behavior is not 
-dependent on its history), reactive (its behavior depends on a finite set of 
-states), or continuous (its behavior depends on its history but in a 
-continuous way).
+scheme proposed by Bruce Douglass, it may be:
+- simple (its behavior is not dependent on its history). An object exhibiting 
+simple behavior always responds to a given input in exactly the same way, 
+regardless of its history.
+- reactive (its behavior depends on a finite set of states), or 
+- continuous (its behavior depends on its history but in a continuous way). An 
+object with continuous behavior is one with an infinite, or at least unbounded, 
+set of existence conditions. Objects with continuous behavior are objects whose 
+current behavior is dependent on past behavior and inputs, but the dependency is 
+of a continuous, rather than discrete nature. 
 
 -# \ref qref19_1
 -# \ref qref19_2
@@ -2994,27 +3000,32 @@ PulseCounterMgr implementation file.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounter definition 
 
 \subsubsection qref19_1_2 Define the type of the container active object 
-This type is derived from RKH_SMA_T type, so an attribute of RKH_SMA_T type has 
-to be defined as its first attribute. The active object maintains an instance 
-of the parameterized state machine, which is defined as an array of state 
-machines. If this type is defined in the PulseCounterMgr implementation file, 
-it will be an opaque type.
+This type is derived from RKH_SMA_T, so a member of this one has to be defined 
+as its first attribute.
+The active object maintains an instance of the parameterized state machine, 
+which is defined as an array of state machines. If the active object type is 
+defined in the PulseCounterMgr implementation file, it will be an opaque type.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounterMgr definition 
 
 \subsubsection qref19_1_3 Declare the active object type 
+Declare the active object type in the PulseCounterMgr specification file, if 
+this type is an opaque one.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.h Type declaration
 
 \subsubsection qref19_1_4 Instantiate the active object
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounterMgr instance
 
 \subsubsection qref19_1_5 Define and declare a reference to the active object
+In this case a reference called pulseCounterMgr of type PulseCounterMgr is 
+defined in the PulseCounterMgr implementation file and declared in the 
+corresponding specification file.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounterMgr pointer definition
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.h PulseCounterMgr pointer declaration
 
 \subsubsection qref19_1_6 Instantiate the constant part of the parameterized state machine
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c PulseCounter instance
 
-\subsubsection qref19_1_7 Define and declare a constructor
+\subsubsection qref19_1_7 Define and declare an active object constructor
 The PulseCounterMgr constructor initializes the PulseCounterMgr's virtual 
 table and its state machine components.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Constructor
@@ -3045,10 +3056,79 @@ the index into the pulseCounters[] array.
 \snippet doc/examples/PulseCounterMgr/PulseCounterMgr.c Task
 
 \subsection qref19_2 Non-reactive active object
-...
+This example demonstrates how to create an active object with a non-reactive 
+behavior by using the RKH framework. This kind of object does not possess a 
+bounded (finite) set of conditions of existence (states).
+The entire example is located in the doc/examples/Monitor directory.
+
+-# \ref qref19_2_1
+-# \ref qref19_2_2
+-# \ref qref19_2_3
+-# \ref qref19_2_4
+-# \ref qref19_2_5
+-# \ref qref19_2_6
+-# \ref qref19_2_7
+
+\subsubsection qref19_2_1 Define the type of the active object
+This type is derived from RKH_SMA_T, so a member of this one has to be defined 
+as its first attribute. If the active object type is defined in the 
+Monitor implementation file, it will be an opaque one.
+\snippet doc/examples/Monitor/Monitor.c Monitor definition 
+
+\subsubsection qref19_2_2 Declare the active object type 
+Declare the active object type in the Monitor specification file, if this type 
+is an opaque one.
+\snippet doc/examples/Monitor/Monitor.h Type declaration
+
+\subsubsection qref19_2_3 Instantiate the active object
+\snippet doc/examples/Monitor/Monitor.c Monitor instance
+
+\subsubsection qref19_2_4 Define and declare a reference to the active object
+In this case a reference called monitor of type Monitor is defined in the Monitor 
+implementation file and declared in the corresponding specification file.
+\snippet doc/examples/Monitor/Monitor.c Monitor pointer definition
+\snippet doc/examples/Monitor/Monitor.h Monitor pointer declaration
+
+\subsubsection qref19_2_5 Define and declare an active object constructor
+The Monitor constructor initializes its virtual function table and its attributes.
+\snippet doc/examples/Monitor/Monitor.c Constructor definition
+\snippet doc/examples/Monitor/Monitor.h Constructor declaration
+
+\subsubsection qref19_2_6 Define event types
+Monitor handles three types of events, PushedButton, Simulator and ADC. 
+PushedButton carries the code of the button pressed, Simulator is a PushedButton 
+type but with additional parameters, whereas ADC carries the result of the 
+conversion in the form of a 16-bit raw count from a ADC channel.
+As shown in the following code fragment, all of these events derive from a 
+framework event type, RKH_EVT_T.
+\snippet doc/examples/Monitor/events.h Event types
+
+\subsubsection qref19_2_7 Override framework operations 
+The type Monitor specializes two functions of the framework's type 
+RKH_SMA_T through its own virtual table. These functions are 
+RKHSmaVtbl::activate and RKHSmaVtbl::task. 
+The first one initializes the active object attributes, for example, a periodic 
+timer to refresh or update variables on a display.
+\snippet doc/examples/Monitor/Monitor.c Activate 
+
+The Monitor active object can receive data messages directly from the ADCs
+ISRs or command messages from other active objects or tasks. When 
+RKHSmaVtbl::task() is called, the message is retrieved and processed in two 
+different ways depending on the sender and the type of message. If the message 
+comes from one of the ADC’s ISR then the message is processed by calling the 
+function processData() and if the message comes from any other task then the 
+message is processed by calling the function processCmd().
+\snippet doc/examples/Monitor/Monitor.c Task
 
 \subsection qref19_3 Periodic active object
-...
+A periodic active object in a real-time system is executed at regular intervals, 
+or after a specified time period. A periodic timer can be used to create this 
+kind of active object by using the RKH framework. A periodic timer is a 
+countdown counter that posts a message to an active object upon counting down to 
+0. This kind of timer is automatically reloaded and a message is posted every 
+time the countdown reaches zero. This message signals a specific active object 
+and makes that object ready-to-run. The active object executes as soon as it 
+becomes the most important one according to its own priority.
 
 \subsection qref19_3_1 Non-reactive
 
@@ -3056,9 +3136,67 @@ the index into the pulseCounters[] array.
 - \ref qref19_3_1_2
 
 \subsubsection qref19_3_1_1 Simple
-...
+This example reads and processes an analog input from a sensor and then updates 
+an actuator state every 1000 milliseconds. This example demonstrates how to 
+create an active object with continuous behaviour using the RKH framework.
+The entire example is located in the doc/examples/SignalMgr directory, and 
+the active object, in particular, is implemented in the file SignalMgr_v4.c.
+
+-# \ref qref19_3_1_1_1
+-# \ref qref19_3_1_1_2
+-# \ref qref19_3_1_1_3
+-# \ref qref19_3_1_1_4
+-# \ref qref19_3_1_1_5
+-# \ref qref19_3_1_1_6
+-# \ref qref19_3_1_1_7
+
+\subsubsection qref19_3_1_1_1 Define the type of the active object
+This type is derived from RKH_SMA_T, so a member of this one has to be defined 
+as its first attribute. If the active object type is defined in the 
+SignalMgr implementation file, it will be an opaque one.
+\snippet doc/examples/SignalMgr/SignalMgr_v4.c Type definition 
+
+\subsubsection qref19_3_1_1_2 Declare the active object type 
+Declare the active object type in the SignalMgr specification file, if this type 
+is an opaque one.
+\snippet doc/examples/SignalMgr/SignalMgr.h Type declaration
+
+\subsubsection qref19_3_1_1_3 Instantiate the active object
+\snippet doc/examples/SignalMgr/SignalMgr_v4.c Instance
+
+\subsubsection qref19_3_1_1_4 Define and declare a reference to the active object
+In this case a reference called signalMgr of type SignalMgr is defined in the 
+SignalMgr implementation file and declared in the corresponding specification file.
+\snippet doc/examples/SignalMgr/SignalMgr_v4.c Object pointer definition
+\snippet doc/examples/SignalMgr/SignalMgr.h Object pointer declaration
+
+\subsubsection qref19_3_1_1_5 Define and declare an active object constructor
+The SignalMgr constructor initializes its virtual function table and its 
+attributes. One of them is a periodic timer called syncTmr which is used to 
+periodically signal this active object.
+\snippet doc/examples/SignalMgr/SignalMgr_v4.c Constructor definition
+\snippet doc/examples/SignalMgr/SignalMgr.h Constructor declaration
+
+\subsubsection qref19_3_1_1_6 Define event types
+This active object does not use a specific event type.
+
+\subsubsection qref19_3_1_1_7 Override framework operations 
+The type SignalMgr specializes two functions of the framework's type 
+RKH_SMA_T through its own virtual table. These functions are 
+RKHSmaVtbl::activate and RKHSmaVtbl::task. 
+The first one initializes the active object attributes, for example, a periodic 
+timer to signal this object.
+\snippet doc/examples/SignalMgr/SignalMgr_v4.c Activate 
+
+Every time SignalMgr executes, it reads and processes an analog input from a 
+sensor and then updates an actuator state.
+\snippet doc/examples/SignalMgr/SignalMgr_v4.c Task
 
 \subsubsection qref19_3_1_2 But using a state machine with synchronous inputs
+...
+The data acquisition task is the main task in the application and implements
+the state machine that processes the analog input samples to calculate the 
+heart rate.
 ...
 
 \subsection qref19_3_2 Reactive

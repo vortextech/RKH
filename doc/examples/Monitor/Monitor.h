@@ -29,13 +29,19 @@ extern "C" {
 
 /* ................................ Signals ................................ */
 /* ........................ Declares active object ......................... */
+//! [Type declaration]
 typedef struct Monitor Monitor;
+//! [Type declaration]
+//! [Monitor pointer declaration]
 RKH_SMA_DCLR_TYPE(Monitor, monitor);
+//! [Monitor pointer declaration]
 
 /* ------------------------------- Data types ------------------------------ */
 /* -------------------------- External variables --------------------------- */
 /* -------------------------- Function prototypes -------------------------- */
+//! [Constructor declaration]
 void Monitor_ctor(Monitor* const me, int baz);
+//! [Constructor declaration]
 int Monitor_getBaz(Monitor* const me);
 
 /* -------------------- External C language linkage end -------------------- */
